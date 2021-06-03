@@ -18,9 +18,10 @@ This plugin currently supports 7 different message overrides with the following 
   * {2}: The NPC's defense
   
 `PlayerJoinTeamMessage`:
-  * {0}: Player Name
-  * {1}: Team Name
-  * {2}: Team color
+  * {0}: Team Join Message
+  * {1}: Player Name
+  * {2}: Team Name
+  * {3}: Team color
   
 `DeathMessageFromPvP`:
   * {0}: Killed players name

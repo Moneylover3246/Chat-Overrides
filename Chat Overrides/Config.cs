@@ -42,10 +42,10 @@ namespace Chat_Overrides
         /*
          * {0} Team Join Message
          * {1} Player Name
-         * {1} Team Name
-         * {2} Team color
+         * {2} Team Name
+         * {3} Team color
          */
-        public string PlayerJoinTeamMessage = "[c/{2}:{0}]";
+        public string PlayerJoinTeamMessage = "[c/{3}:{0}]";
 
         /*
          * {0} Name of the person who died
