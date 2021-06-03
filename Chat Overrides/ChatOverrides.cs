@@ -23,6 +23,7 @@ namespace Chat_Overrides
 
 		public static Config Config = new Config();
 		public string SavePath = "ChatOverrides.json";
+		public static string[] TeamName = new string[6];
 
 		private readonly Timer StatusTimer = new Timer(100);
 		public ChatOverrides(Main game) : base(game)
@@ -38,6 +39,12 @@ namespace Chat_Overrides
 			ItemRarity.Initialize();
 			StatusTimer.Start();
 			StatusTimer.Elapsed += OnStatusTimerElapsed;
+			TeamName[0] = "white";
+			TeamName[1] = "red";
+			TeamName[2] = "green";
+			TeamName[3] = "blue";
+			TeamName[4] = "yellow";
+			TeamName[5] = "pink";
 		}
 
 		protected override void Dispose(bool disposing)
@@ -76,18 +83,20 @@ namespace Chat_Overrides
 							player.team = team;
 							Color teamColor = Main.teamColor[team];
 							NetMessage.TrySendData(45, -1, args.Msg.whoAmI, null, playerid, 0f, 0f, 0f, 0, 0, 0);
-							LocalizedText teamName = Lang.mp[13 + team];
+							LocalizedText teamJoinText = Lang.mp[13 + team];
+							
 							if (team == 5)
 							{
-								teamName = Lang.mp[22];
+								teamJoinText = Lang.mp[22];
 							}
 							for (int i = 0; i < 255; i++)
 							{
 								if (i == args.Msg.whoAmI || (oldteam > 0 && Main.player[i].team == oldteam) || (team > 0 && Main.player[i].team == team))
 								{
 									TShock.Players[i].SendMessage(string.Format(Config.PlayerJoinTeamMessage,
+										teamJoinText,
 										player.name,
-										teamName,
+										TeamName[team],
 										teamColor.Hex3()), Color.White);
 								}
 							}

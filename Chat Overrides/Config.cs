@@ -40,11 +40,12 @@ namespace Chat_Overrides
         public string BossDefeatedMessage = "[c/AF4BFF:{0} {1} been defeated!]";
 
         /*
-         * {0} Player Name
+         * {0} Team Join Message
+         * {1} Player Name
          * {1} Team Name
          * {2} Team color
          */
-        public string PlayerJoinTeamMessage = "[c/{2}:{0} has joined the {1} party.]";
+        public string PlayerJoinTeamMessage = "[c/{2}:{0}]";
 
         /*
          * {0} Name of the person who died
