@@ -13,51 +13,51 @@ using TShockAPI.Hooks;
 
 namespace Chat_Overrides
 {
-    [ApiVersion(2, 1)]
-    public class ChatOverrides : TerrariaPlugin
-    {
-        public override string Name => "Chat Overrides";
-        public override string Description => "Allows custom chat messages when certain events happen";
-        public override string Author => "Moneylover3246";
+	[ApiVersion(2, 1)]
+	public class ChatOverrides : TerrariaPlugin
+	{
+		public override string Name => "Chat Overrides";
+		public override string Description => "Allows custom chat messages when certain events happen";
+		public override string Author => "Moneylover3246";
 		public override Version Version => new Version("1.0");
 
-        public static Config Config = new Config();
-        public string SavePath = "ChatOverrides.json";
+		public static Config Config = new Config();
+		public string SavePath = "ChatOverrides.json";
 
 		private readonly Timer StatusTimer = new Timer(100);
-        public ChatOverrides(Main game) : base(game)
-        {  
-        }
+		public ChatOverrides(Main game) : base(game)
+		{
+		}
 
-        public override void Initialize()
-        {
-            ServerApi.Hooks.NetGetData.Register(this, OnGetData);
-            ServerApi.Hooks.NpcStrike.Register(this, OnNPCStrike);
+		public override void Initialize()
+		{
+			ServerApi.Hooks.NetGetData.Register(this, OnGetData);
+			ServerApi.Hooks.NpcStrike.Register(this, OnNPCStrike);
 			GeneralHooks.ReloadEvent += OnReload;
-            Config = Config.Read(Path.Combine(TShock.SavePath, SavePath));
+			Config = Config.Read(Path.Combine(TShock.SavePath, SavePath));
 			ItemRarity.Initialize();
 			StatusTimer.Start();
 			StatusTimer.Elapsed += OnStatusTimerElapsed;
-        }
+		}
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                ServerApi.Hooks.NetGetData.Deregister(this, OnGetData);
-                ServerApi.Hooks.NpcStrike.Deregister(this, OnNPCStrike);
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				ServerApi.Hooks.NetGetData.Deregister(this, OnGetData);
+				ServerApi.Hooks.NpcStrike.Deregister(this, OnNPCStrike);
 				GeneralHooks.ReloadEvent -= OnReload;
 				StatusTimer.Stop();
-            }
-            base.Dispose(disposing);
-        }
+			}
+			base.Dispose(disposing);
+		}
 
 		private void OnReload(ReloadEventArgs args)
-        {
+		{
 			Config = Config.Read(Path.Combine(TShock.SavePath, SavePath));
-        }
+		}
 
-        private void OnGetData(GetDataEventArgs args)
+		private void OnGetData(GetDataEventArgs args)
 		{
 			using (BinaryReader reader = new BinaryReader(new MemoryStream(args.Msg.readBuffer, args.Index, args.Length)))
 			{
@@ -116,7 +116,7 @@ namespace Chat_Overrides
 						}
 						break;
 					case PacketTypes.PlayerDeathV2:
-                        {
+						{
 							int player = reader.ReadByte();
 							player = args.Msg.whoAmI;
 							PlayerDeathReason reason = PlayerDeathReason.FromReader(reader);
@@ -125,7 +125,7 @@ namespace Chat_Overrides
 							int direction = (reader.ReadByte() - 1);
 							bool pvp = ((BitsByte)reader.ReadByte())[0];
 
-							TSPlayer killedPlayer = TShock.Players[player]; 
+							TSPlayer killedPlayer = TShock.Players[player];
 							Item item = new Item();
 							item.SetDefaults(reason._sourceItemType);
 							item.Prefix(reason._sourceItemPrefix);
@@ -159,7 +159,7 @@ namespace Chat_Overrides
 							Random random = new Random();
 							string description = deathMessageDescriptions[random.Next(0, deathMessageDescriptions.Length)];
 							if (pvp)
-                            {
+							{
 								TSPlayer killer = TShock.Players[reason._sourcePlayerIndex];
 								newDeathReason = string.Format(Config.DeathMessageFromPvP,
 									killedPlayer.Name,
@@ -173,9 +173,9 @@ namespace Chat_Overrides
 									killer.TPlayer.statLife,
 									killer.TPlayer.statMana,
 									killer.TPlayer.statDefense);
-                            }
+							}
 							else if (reason._sourceNPCIndex != -1)
-                            {
+							{
 								NPC npc = Main.npc[reason._sourceNPCIndex];
 								newDeathReason = string.Format(Config.DeathMessageFromNPC,
 									npc.GivenOrTypeName,
@@ -183,12 +183,12 @@ namespace Chat_Overrides
 									npc.lifeMax,
 									npc.type,
 									npc.defDefense);
-                            }
+							}
 
 							if (newDeathReason != "")
-                            {
+							{
 								reason = PlayerDeathReason.ByCustomReason(newDeathReason);
-                            }
+							}
 							Main.player[player].KillMe(reason, damage, direction, pvp);
 							NetMessage.SendPlayerDeath(player, reason, damage, direction, pvp, -1, args.Msg.whoAmI);
 							args.Handled = true;
@@ -196,16 +196,16 @@ namespace Chat_Overrides
 						break;
 				}
 			}
-        }
+		}
 
-        private void OnNPCStrike(NpcStrikeEventArgs args)
-        {
-            NPC npc = args.Npc;
+		private void OnNPCStrike(NpcStrikeEventArgs args)
+		{
+			NPC npc = args.Npc;
 			double damage = args.Damage;
 			int defense = npc.defense;
 			damage = Main.CalculateDamageNPCsTake((int)damage, defense);
 			if (npc.boss && (npc.life - damage) <= 0 && !string.IsNullOrEmpty(Config.BossDefeatedMessage) && npc.active)
-            {		
+			{
 				if (npc.ichor)
 				{
 					defense -= 15;
@@ -218,7 +218,7 @@ namespace Chat_Overrides
 				{
 					defense = 0;
 				}
-				
+
 				if (args.Critical)
 				{
 					damage *= 2.0;
@@ -408,19 +408,19 @@ namespace Chat_Overrides
 						name, singularOrplural, npc.defDefense), Color.White);
 				}
 				args.Handled = true;
-            }
-        }
+			}
+		}
 
 		private void OnStatusTimerElapsed(object o, ElapsedEventArgs args)
-        {
+		{
 			if (!Config.SidebarEnabled && string.IsNullOrEmpty(Config.SidebarText))
 				return;
 			foreach (TSPlayer player in TShock.Players.Where(p => p != null && Netplay.Clients[p.Index].State == 10))
-            {
+			{
 				RemoteClient client = Netplay.Clients[player.Index];
 				int statusMax = client.StatusMax += 5;
 				player.SendData(PacketTypes.Status, Config.SidebarText, statusMax, 3);
-            }
-        }
-    }
+			}
+		}
+	}
 }
