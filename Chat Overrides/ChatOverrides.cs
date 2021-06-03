@@ -94,7 +94,7 @@ namespace Chat_Overrides
 								if (i == args.Msg.whoAmI || (oldteam > 0 && Main.player[i].team == oldteam) || (team > 0 && Main.player[i].team == team))
 								{
 									TShock.Players[i].SendMessage(string.Format(Config.PlayerJoinTeamMessage,
-										teamJoinText.Value,
+										string.Format(teamJoinText.Value, player.name),
 										player.name,
 										TeamName[team],
 										teamColor.Hex3()), Color.White);
