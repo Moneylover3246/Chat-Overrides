@@ -19,6 +19,7 @@ namespace Chat_Overrides
         public override string Name => "Chat Overrides";
         public override string Description => "Allows custom chat messages when certain events happen";
         public override string Author => "Moneylover3246";
+		public override Version Version => new Version("1.0");
 
         public static Config Config = new Config();
         public string SavePath = "ChatOverrides.json";
