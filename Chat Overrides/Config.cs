@@ -71,6 +71,8 @@ namespace Chat_Overrides
          */
         public string DeathMessageFromNPC = "";
 
+        public bool DisableDeathMessages = false;
+
         /*
          * {0} NPC Type Name
          * {1} NPC's given name

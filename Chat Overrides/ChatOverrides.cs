@@ -19,7 +19,7 @@ namespace Chat_Overrides
 		public override string Name => "Chat Overrides";
 		public override string Description => "Allows custom chat messages when certain events happen";
 		public override string Author => "Moneylover3246";
-		public override Version Version => new Version("1.0.1");
+		public override Version Version => new Version("1.0.2");
 
 		public static Config Config = new Config();
 		public string SavePath = "ChatOverrides.json";
@@ -139,6 +139,15 @@ namespace Chat_Overrides
 							item.SetDefaults(reason._sourceItemType);
 							item.Prefix(reason._sourceItemPrefix);
 
+							args.Handled = true;
+
+							if (Config.DisableDeathMessages)
+                            {
+								reason = PlayerDeathReason.ByCustomReason("");
+								Main.player[player].KillMe(reason, damage, direction, pvp);
+								NetMessage.SendPlayerDeath(player, reason, damage, direction, pvp, -1, args.Msg.whoAmI);
+								return;
+							}
 							string[] deathMessageDescriptions = new string[]
 							{
 								" was eviscerated by",
@@ -169,6 +178,13 @@ namespace Chat_Overrides
 							string description = deathMessageDescriptions[random.Next(0, deathMessageDescriptions.Length)];
 							if (pvp)
 							{
+								if (string.IsNullOrEmpty(Config.DeathMessageFromPvP))
+								{
+									reason = PlayerDeathReason.ByCustomReason("");
+									Main.player[player].KillMe(reason, damage, direction, pvp);
+									NetMessage.SendPlayerDeath(player, reason, damage, direction, pvp, -1, args.Msg.whoAmI);
+									return;
+								}
 								TSPlayer killer = TShock.Players[reason._sourcePlayerIndex];
 								newDeathReason = string.Format(Config.DeathMessageFromPvP,
 									killedPlayer.Name,
@@ -185,6 +201,13 @@ namespace Chat_Overrides
 							}
 							else if (reason._sourceNPCIndex != -1)
 							{
+								if (string.IsNullOrEmpty(Config.DeathMessageFromNPC))
+                                {
+									reason = PlayerDeathReason.ByCustomReason("");
+									Main.player[player].KillMe(reason, damage, direction, pvp);
+									NetMessage.SendPlayerDeath(player, reason, damage, direction, pvp, -1, args.Msg.whoAmI);
+									return;
+								}
 								NPC npc = Main.npc[reason._sourceNPCIndex];
 								newDeathReason = string.Format(Config.DeathMessageFromNPC,
 									npc.GivenOrTypeName,
@@ -193,14 +216,12 @@ namespace Chat_Overrides
 									npc.type,
 									npc.defDefense);
 							}
-
 							if (newDeathReason != "")
 							{
 								reason = PlayerDeathReason.ByCustomReason(newDeathReason);
 							}
 							Main.player[player].KillMe(reason, damage, direction, pvp);
 							NetMessage.SendPlayerDeath(player, reason, damage, direction, pvp, -1, args.Msg.whoAmI);
-							args.Handled = true;
 						}
 						break;
 				}
