@@ -135,6 +135,18 @@ namespace Chat_Overrides
 							bool pvp = ((BitsByte)reader.ReadByte())[0];
 
 							TSPlayer killedPlayer = TShock.Players[player];
+							killedPlayer.Dead = true;
+							killedPlayer.RespawnTimer = TShock.Config.Settings.RespawnSeconds;
+
+							foreach (NPC npc in Main.npc)
+							{
+								if (npc.active && (npc.boss || npc.type == 13 || npc.type == 14 || npc.type == 15) &&
+									Math.Abs(killedPlayer.TPlayer.Center.X - npc.Center.X) + Math.Abs(killedPlayer.TPlayer.Center.Y - npc.Center.Y) < 4000f)
+								{
+									killedPlayer.RespawnTimer = TShock.Config.Settings.RespawnBossSeconds;
+									break;
+								}
+							}
 							Item item = new Item();
 							item.SetDefaults(reason._sourceItemType);
 							item.Prefix(reason._sourceItemPrefix);
@@ -220,8 +232,38 @@ namespace Chat_Overrides
 							{
 								reason = PlayerDeathReason.ByCustomReason(newDeathReason);
 							}
+							
+							if (killedPlayer.TPlayer.difficulty == 1 || killedPlayer.TPlayer.difficulty == 2)
+							{
+								bool mediumcore = killedPlayer.TPlayer.difficulty == 1;
+								bool shouldBan = mediumcore ? TShock.Config.Settings.BanOnMediumcoreDeath : TShock.Config.Settings.BanOnHardcoreDeath;
+								bool shouldKick = mediumcore ? TShock.Config.Settings.KickOnMediumcoreDeath : TShock.Config.Settings.KickOnHardcoreDeath;
+								string banReason = mediumcore ? TShock.Config.Settings.MediumcoreBanReason : TShock.Config.Settings.HardcoreBanReason;
+								string kickReason = mediumcore ? TShock.Config.Settings.MediumcoreKickReason : TShock.Config.Settings.HardcoreKickReason;
+
+								if (shouldBan)
+								{
+									if (!killedPlayer.Ban(banReason, false, "TShock"))
+									{
+										killedPlayer.Kick("You died! Normally, you'd be banned.", true, true);
+									}
+								}
+								else if (shouldKick)
+								{
+									killedPlayer.Kick(kickReason, true, true, null, false);
+								}
+							}
+
+							if (killedPlayer.TPlayer.difficulty == 2 && Main.ServerSideCharacter && killedPlayer.IsLoggedIn)
+							{
+								if (TShock.CharacterDB.RemovePlayer(killedPlayer.Account.ID))
+								{
+									killedPlayer.SendErrorMessage("You have fallen in hardcore mode, and your items have been lost forever.");
+									TShock.CharacterDB.SeedInitialData(killedPlayer.Account);
+								}
+							}
 							Main.player[player].KillMe(reason, damage, direction, pvp);
-							NetMessage.SendPlayerDeath(player, reason, damage, direction, pvp, -1, args.Msg.whoAmI);
+							NetMessage.SendPlayerDeath(player, reason, damage, direction, pvp, -1, player);
 						}
 						break;
 				}
